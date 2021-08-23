@@ -7,10 +7,10 @@ networks:
 
 services:
 
-  control:
+  bastion:
     image: quay.io/tonykay/vmlet-rhel-8-base
-    container_name: control
-    hostname: control
+    container_name: bastion
+    hostname: bastion
     privileged: true
     ports:
       - "5222:22"
@@ -18,4 +18,3 @@ services:
   target:
     image: quay.io/tonykay/vmlet-rhel-8-base
     privileged: true
-    hostname: target
