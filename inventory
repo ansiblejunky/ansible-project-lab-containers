@@ -1,0 +1,5 @@
+[bastion]
+control
+
+[targets]
+ansible-lab-containers_target_1
