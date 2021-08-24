@@ -85,34 +85,39 @@ jump_2 | SUCCESS => {
 
 [docker_container inventory plugin not defaulting ip and port correctly when using ssh connection type](https://github.com/ansible-collections/community.docker/issues/193)
 
-```
+[Vagrant Insecure Keypair](https://github.com/hashicorp/vagrant/tree/master/keys)
+
+[source,bash]
+----
+# Startup containers
 docker compose up -d
 docker compose up --scale target=100 -d
-ansible targets -m ping -i docker.yml
+
+# Perform Ansible connection tests
+ansible all -m ping
+ansible all -m ping --forks=20
+
+# Shutdown all containers
+docker compose down
+----
+
+[source,bash]
+----
+ansible-inventory -i docker.yml --list
+
+ansible targets -m ping
 
 # Get host IP address
 ipconfig getifaddr en0
 
 # Get IP of target container
-docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' docker_target_1
+docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ansible_target_1
 
 # Get publicized port for control node for ssh connection
-docker port control
+docker port bastion
 
 # Test direct SSH to control node
-# Using this syntax: ssh -i <absolute-path-to-pem> devops@localhost -p <published-container-port>
-ssh -i /Users/jwadleig/Projects/ansible-lab-containers/devops.pem devops@localhost -p 5222
-```
+# Using this syntax: ssh -i <path-to-pem> devops@localhost -p <published-container-port>
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i devops.pem devops@localhost -p 5222
 
-```
-ssh -C -o ControlMaster=auto -o ControlPersist=60s -o KbdInteractiveAuthentication=no -o PreferredAuthentications=gssapi-with-mic,gssapi-keyex,hostbased,publickey -o PasswordAuthentication=no -o ConnectTimeout=10 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o 'ProxyCommand=ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /Users/jwadleig/Projects/ansible-lab-containers/devops.pem -W %h:%p -q devops@localhost -p 5222' -i /Users/jwadleig/Projects/ansible-lab-containers/devops.pem lab-ssh-jump_target_1
-
-ansible_ssh_common_args: -i /Users/jwadleig/Projects/ansible-lab-containers/devops.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /Users/jwadleig/Projects/ansible-lab-containers/devops.pem -W %h:%p -q devops@localhost -p 5222'
-
-
-ssh -A -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i /Users/jwadleig/Projects/ansible-lab-containers/devops.pem -o ProxyCommand="ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -p 5222 -i devops.pem -W %h:%p devops@localhost" ansible-lab-containers_target_1
-
-ssh -A -J bastion@127.0.0.1:5222 devops@ansible-lab-containers_target_1
-
-ansible_ssh_common_args: -F ./ssh.cfg
-```
+----

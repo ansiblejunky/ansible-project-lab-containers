@@ -1,2 +1,2 @@
-ansible_ssh_common_args: -i devops.pem -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i devops.pem -W %h:%p -q devops@localhost -p 5222'
-ansible_user: devops
+ansible_ssh_common_args: -i vagrant -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ProxyCommand='ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i vagrant -W %h:%p -q admin@localhost -p 5222'
+ansible_user: admin

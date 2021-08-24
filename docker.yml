@@ -3,3 +3,10 @@ connection_type: ssh
 groups:
   targets: "'target' in docker_name"
   bastions: "'bastion' in docker_name"
+  
+# Compose variables to set host and port correctly
+# docker_container inventory plugin not defaulting ip and port correctly when using ssh connection type
+# https://github.com/ansible-collections/community.docker/issues/193
+compose:
+  ansible_ssh_host: ansible_ssh_host | default(docker_name[1:], true)
+  ansible_ssh_port: ansible_ssh_port | default(22, true)

@@ -1,0 +1,26 @@
+
+FROM ubuntu:latest
+
+ARG ssh_user=admin
+ENV SSH_USER=${ssh_user}
+ARG ssh_password=admin
+ENV SSH_PASSWORD=${ssh_password}
+ARG ssh_public_key_file=vagrant.pub
+ENV SSH_PUBLIC_KEY_FILE=${ssh_public_key_file}
+
+RUN apt update && apt install -y openssh-server sudo
+
+RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1000 ${SSH_USER} 
+RUN echo "${SSH_USER}:${SSH_PASSWORD}" | chpasswd
+RUN mkdir /home/ubuntu/.ssh
+RUN chown ${SSH_USER} /home/ubuntu/.ssh
+RUN chmod 700 /home/ubuntu/.ssh
+COPY ${SSH_PUBLIC_KEY_FILE} /home/ubuntu/.ssh/authorized_keys
+RUN chmod 400 /home/ubuntu/.ssh/authorized_keys
+RUN chown ${SSH_USER} /home/ubuntu/.ssh/authorized_keys
+
+RUN service ssh start
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd","-D"]
