@@ -120,9 +120,17 @@ See below parameters in the docker-compose.yml file.
 
 === References
 
-[docker_container inventory plugin not defaulting ip and port correctly when using ssh connection type](https://github.com/ansible-collections/community.docker/issues/193)
+https://github.com/ansible-collections/community.docker/issues/193[docker_container inventory plugin not defaulting ip and port correctly when using ssh connection type]
+https://github.com/hashicorp/vagrant/tree/master/keys[Vagrant Insecure Keypair]
+https://docs.ansible.com/ansible-tower/latest/html/userguide/jobs.html#at-capacity-determination-and-job-impact[Ansible Tower Capacity Determination and Job Impact]
+https://access.redhat.com/solutions/4706201[Ansible playbook fails with "Cannot allocate memory]
+https://opensource.com/article/19/3/ansible-performance[Ansible performance: Revving up the engine and maintaining stability]
+https://raw.githubusercontent.com/ansible/ansible/devel/examples/ansible.cfg[Ansible parameters using ansible.cfg]
+https://access.redhat.com/solutions/54099[What is the maximum setting for MaxStartups in /etc/ssh/sshd_config?]
+https://github.com/jsternberg/ansible-agent[Alternative SSH connection plugin]
+https://linuxhint.com/ssh-maxsessions-configuration/[SSH MaxSessions Configuration]
+https://github.com/ansible/ansible/issues/17349#issuecomment-396088877[The MaxStartups sshd tweaks]
 
-[Vagrant Insecure Keypair](https://github.com/hashicorp/vagrant/tree/master/keys)
 
 === Credits
 
