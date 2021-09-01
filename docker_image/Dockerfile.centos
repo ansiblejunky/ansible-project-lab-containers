@@ -1,0 +1,32 @@
+
+FROM centos:8
+
+ARG ssh_user=admin
+ENV SSH_USER=${ssh_user}
+ARG ssh_password=admin
+ENV SSH_PASSWORD=${ssh_password}
+ARG ssh_public_key_file=vagrant.pub
+ENV SSH_PUBLIC_KEY_FILE=${ssh_public_key_file}
+ARG ssh_path=/home/${ssh_user}/.ssh
+
+RUN yum -y update
+RUN yum install -y openssh
+RUN yum install -y openssh-server
+RUN yum install -y sudo
+
+RUN adduser ${SSH_USER}
+RUN usermod -aG wheel ${SSH_USER} --shell /bin/bash
+RUN echo "${SSH_USER}:${SSH_PASSWORD}" | chpasswd
+RUN mkdir ${ssh_path}
+RUN chown ${SSH_USER} ${ssh_path}
+RUN chmod 700 ${ssh_path}
+COPY ${SSH_PUBLIC_KEY_FILE} ${ssh_path}/authorized_keys
+RUN chmod 400 ${ssh_path}/authorized_keys
+RUN chown ${SSH_USER} ${ssh_path}/authorized_keys
+
+# This fails currently...
+RUN systemctl start sshd
+
+EXPOSE 22
+
+CMD ["/usr/sbin/sshd","-D"]

@@ -1,3 +1,5 @@
+# community.docker.docker_containers – Ansible dynamic inventory plugin for Docker containers
+# https://docs.ansible.com/ansible/latest/collections/community/docker/docker_containers_inventory.html
 plugin: community.docker.docker_containers
 connection_type: ssh
 groups:

@@ -8,7 +8,7 @@ ENV SSH_PASSWORD=${ssh_password}
 ARG ssh_public_key_file=vagrant.pub
 ENV SSH_PUBLIC_KEY_FILE=${ssh_public_key_file}
 
-RUN apt update && apt install -y openssh-server sudo
+RUN apt update && apt install -y vim openssh-server sudo
 
 RUN useradd -rm -d /home/ubuntu -s /bin/bash -g root -G sudo -u 1000 ${SSH_USER} 
 RUN echo "${SSH_USER}:${SSH_PASSWORD}" | chpasswd

@@ -3,6 +3,7 @@ networks:
   default:
     name: example.com
 
+# TIP: Use these services when testing indirect connection with bastion host
 services:
 
   bastion:
@@ -16,3 +17,12 @@ services:
   target:
     image: ansible-ssh-server
     privileged: true
+
+# TIP: Use these service definitions when testing direct connection without bastion host
+# services:
+
+#   target:
+#     image: ansible-ssh-server
+#     privileged: true
+#     ports:
+#       - "22"

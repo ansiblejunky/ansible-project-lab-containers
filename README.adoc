@@ -1,110 +1,51 @@
 == Overview
 
-Simple triple jump ssh demo using `ProxyJump` directive in an `ssh.cfg`
-In this scenario your host machine and the `control` container cannot directly reach `target`.
-2 `ssh` jumpboxes sit between `control` and `target`.
+Simple Ansible ssh demo using:
 
-Host -> control -> jump_1 -> jump_2 -> target
+* Docker containers to rapidly spin up simulated bastion and target hosts
+* Docker dynamic inventory plugin `community.docker.docker_containers`
+* No `ssh.cfg`, since most customers do not have this option
+* Using `ansible_ssh_common_args` inventory variable
+* Bastion host, which is required to reach target hosts (host -> bastion -> targets)
+* Target hosts (scalable for performance testing purposes)
 
+You can also use this demo without a bastion host and just connect directly to target hosts. See `docker-compose.yml` for both possible scenarios and how to enable them.
 
 === Usage
 
-To test directly with `ssh` from your host (laptop typically).
+The following instructions show how to spin up the containers and test Ansible connectivity.
 
 [source,bash]
 ----
+# Startup containers and gradually scale up (otherwise you hit errors)
 docker compose up -d
-ssh -F ssh.cfg target
-----
-
-=== Ansible example
-
-Simple `ansible.cfg` to show one way of using an external `ssh.cfg` file
-
-
-[source,bash]
-----
-[defaults]
-inventory                   = inventory
-
-[ssh_connection]
-ssh_args                    = -F ./ssh.cfg
-----
-
-And a simple `inventory`
-
-
-[source,bash]
-----
-----
-[far_away_host]
-target
-
-[control_node]
-control
-
-[jumpboxes]
-jump_1
-jump_2
-
-. Example usage
-
-[source,bash]
-----
-ansible all -m ping
-Friday 14 May 2021  11:24:03 -0600 (0:00:00.203)       0:00:00.203 ************
-control | SUCCESS => {
-    "ansible_facts": {
-        "discovered_interpreter_python": "/usr/libexec/platform-python"
-    },
-    "changed": false,
-    "ping": "pong"
-}
-jump_1 | SUCCESS => {
-    "ansible_facts": {
-        "discovered_interpreter_python": "/usr/libexec/platform-python"
-    },
-    "changed": false,
-    "ping": "pong"
-}
-target | SUCCESS => {
-    "ansible_facts": {
-        "discovered_interpreter_python": "/usr/libexec/platform-python"
-    },
-    "changed": false,
-    "ping": "pong"
-}
-jump_2 | SUCCESS => {
-    "ansible_facts": {
-        "discovered_interpreter_python": "/usr/libexec/platform-python"
-    },
-    "changed": false,
-    "ping": "pong"
-}
-----
-
-[docker_container inventory plugin not defaulting ip and port correctly when using ssh connection type](https://github.com/ansible-collections/community.docker/issues/193)
-
-[Vagrant Insecure Keypair](https://github.com/hashicorp/vagrant/tree/master/keys)
-
-[source,bash]
-----
-# Startup containers
-docker compose up -d
+docker compose up --scale target=20 -d
+docker compose up --scale target=40 -d
+docker compose up --scale target=60 -d
+docker compose up --scale target=80 -d
 docker compose up --scale target=100 -d
 
 # Perform Ansible connection tests
-ansible all -m ping
-ansible all -m ping --forks=20
+ansible-playbook playbook-ping.yml
+ansible-playbook playbook-ping.yml --forks=20
 
-# Shutdown all containers
+# Prove that bastion is required to connect to targets
+docker compose stop bastion
+# Fails to connect since bastion is stopped
+ansible-playbook playbook-ping.yml
+
+# Destroy all containers
 docker compose down
 ----
 
+Other tips and tricks.
+
 [source,bash]
 ----
+# Ensure docker dynamic inventory plugin works
 ansible-inventory -i docker.yml --list
 
+# Ensure you can connect to targets using ping
 ansible targets -m ping
 
 # Get host IP address
@@ -113,11 +54,56 @@ ipconfig getifaddr en0
 # Get IP of target container
 docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' ansible_target_1
 
-# Get publicized port for control node for ssh connection
+# Get publicized port for bastion node for ssh connection
 docker port bastion
 
-# Test direct SSH to control node
-# Using this syntax: ssh -i <path-to-pem> devops@localhost -p <published-container-port>
-ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i devops.pem devops@localhost -p 5222
+# Test direct SSH to bastion node
+ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -i vagrant admin@localhost -p 5222
+----
+
+Performance testing tips
+
+[source,bash]
+----
+# Connect to bastion host
+ssh -i vagrant admin@localhost -p 5222
+# Clear dmesg buffer
+sudo dmesg -c
+# Edit sshd configuration
+sudo vi /etc/ssh/sshd_config
+# Exit bastion
+exit
+
+# Run Ansible connection test using forks parameter
+ansible-playbook playbook-ping.yml --forks 50
+
+# Connect to bastion host
+ssh -i vagrant admin@localhost -p 5222
+# Check dmesg buffer for errors
+sudo dmesg
+# Check ssh logs for errors
+?
+----
+
+=== Ansible examples
+
+[source,bash]
+----
+# Run ping playbook against all hosts/containers
+ansible-playbook playbook-ping.yml
+
+# Run ping playbook against all hosts/containers using forks parameter for performance
+ansible-playbook playbook-ping.yml --forks=10
 
 ----
+
+=== References
+
+[docker_container inventory plugin not defaulting ip and port correctly when using ssh connection type](https://github.com/ansible-collections/community.docker/issues/193)
+
+[Vagrant Insecure Keypair](https://github.com/hashicorp/vagrant/tree/master/keys)
+
+=== Credits
+
+Original code thanks to Tony Kay
+Specific implementation/lab by John Wadleigh
