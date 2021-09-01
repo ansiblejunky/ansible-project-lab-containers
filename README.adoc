@@ -17,6 +17,9 @@ The following instructions show how to spin up the containers and test Ansible c
 
 [source,bash]
 ----
+# Create the image first
+docker build . -f Dockerfile.ubuntu -t ansible-ssh-server
+
 # Startup containers and gradually scale up (otherwise you hit errors)
 docker compose up -d
 docker compose up --scale target=20 -d
