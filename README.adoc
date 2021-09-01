@@ -134,5 +134,5 @@ See below parameters in the docker-compose.yml file.
 
 === Credits
 
-Original code thanks to Tony Kay
-Specific implementation/lab by John Wadleigh
+* Original code thanks to Tony Kay
+* Specific implementation/lab by John Wadleigh
