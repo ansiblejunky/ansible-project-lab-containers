@@ -97,6 +97,24 @@ ansible-playbook playbook-ping.yml --forks=10
 
 ----
 
+=== Performance Testing Outcomes
+
+This lab was created to actually test possible connection errors when attempting a high number of forks against a high number of targets. It was discovered that when using a bastion host and a high number of forks (35, for example) there were random connection errors (not the same targets). However, without the bastion host and going directly to targets no errors were ever seen - even when using high number of forks. The take away from this was that there is a huge demand on the bastion host's resources when all those connections are attempted at the same time. When the bastion host cannot keep up or grow fast enough to provide the resources (containers dynamically grow) needed, it caused connection errors. However, running the same playbook repeatedly resulted in eventually all connections successfully being established. This, however, is the result of using the ssh `ControlPersist` paramete that holds onto the successful connections established on the 1st and 2nd attempts until the 3rd attempt connects to all targets. 
+
+Ultimately the importance and focus should be placed on the resources of the bastion host.
+
+For further testing, notice in `docker-compose.yml` you can set the memory/cpu resource limits for the bastion host. Without limits set, we see random connection failures because Docker cannot keep up with the resource demands that Ansible places on it for establishing parallel ssh connections. With limitations set, these errors never happen because bastion host has enough resources to support the ssh connection request demands. 
+
+See below parameters in the docker-compose.yml file.
+
+[source,bash]
+----
+    mem_limit: 512m
+    mem_reservation: 128M
+    cpus: 0.5
+----
+
+
 === References
 
 [docker_container inventory plugin not defaulting ip and port correctly when using ssh connection type](https://github.com/ansible-collections/community.docker/issues/193)
