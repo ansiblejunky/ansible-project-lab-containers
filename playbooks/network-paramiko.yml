@@ -1,0 +1,8 @@
+---
+- hosts: network_paramiko
+  gather_facts: false
+
+  tasks:
+  - name: run show version command
+    cli_command:
+      command: show version

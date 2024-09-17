@@ -1,0 +1,41 @@
+---
+name: ansible
+networks:
+  default:
+    name: example.com
+
+# SCENARIO: Use these services when testing indirect connection with bastion host
+services:
+  bastion:
+    image: ansible-ssh-server
+    container_name: bastion
+    hostname: bastion
+    privileged: true
+    ports:
+      - "5222:22"
+    # mem_limit: 512m
+    # mem_reservation: 128M
+    # cpus: 0.5
+
+  target:
+    image: ansible-fake-switch
+    privileged: true
+    ports:
+      - "12723:6000"
+
+# SCENARIO: Use these services to install Ansible Automation Platform on these containers
+# services:
+#   aap-control:
+#     image: ansible-ssh-server
+#     container_name: aap-control
+#     hostname: aap-control
+#     privileged: true
+#     ports:
+#       - "5222:22"
+#   aap-pg1:
+#     image: ansible-ssh-server
+#     container_name: aap-pg1
+#     hostname: aap-pg1
+#     privileged: true
+#     ports:
+#       - "5422:22"

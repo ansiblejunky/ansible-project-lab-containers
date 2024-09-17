@@ -1,0 +1,7 @@
+---
+# Install collections locally using the following command:
+# ansible-galaxy collection install -r collections/requirements.yml -f
+
+collections:
+  - name: ansible.netcommon
+  - name: f5networks.f5_modules

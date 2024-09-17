@@ -5,7 +5,8 @@ connection_type: ssh
 groups:
   targets: "'target' in docker_name"
   bastions: "'bastion' in docker_name"
-  
+  ansible-platform: "'aap' in docker_name"
+
 # Compose variables to set host and port correctly
 # docker_container inventory plugin not defaulting ip and port correctly when using ssh connection type
 # https://github.com/ansible-collections/community.docker/issues/193

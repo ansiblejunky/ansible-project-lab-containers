@@ -18,6 +18,7 @@ The following instructions show how to spin up the containers and test Ansible c
 [source,bash]
 ----
 # Create the image first
+cd docker_image
 docker build . -f Dockerfile.ubuntu -t ansible-ssh-server
 
 # Startup containers and gradually scale up (otherwise you hit errors)
@@ -28,16 +29,19 @@ docker compose up --scale target=60 -d
 docker compose up --scale target=80 -d
 docker compose up --scale target=100 -d
 
+# Ensure local private key is secured
+chmod 600 vagrant
+
 # Perform Ansible connection tests
-ansible-playbook playbook-ping.yml
-ansible-playbook playbook-ping.yml --forks=20
+ansible-playbook playbooks/ping.yml
+ansible-playbook playbooks/ping.yml --forks=20
 
 # Prove that bastion is required to connect to targets
 docker compose stop bastion
 # Fails to connect since bastion is stopped
-ansible-playbook playbook-ping.yml
+ansible-playbook playbooks/ping.yml
 
-# Destroy all containers
+# Cleanup everything
 docker compose down
 ----
 
@@ -78,7 +82,7 @@ sudo vi /etc/ssh/sshd_config
 exit
 
 # Run Ansible connection test using forks parameter
-ansible-playbook playbook-ping.yml --forks 50
+ansible-playbook playbooks/ping.yml --forks 50
 
 # Connect to bastion host
 ssh -i vagrant admin@localhost -p 5222
@@ -93,10 +97,10 @@ sudo dmesg
 [source,bash]
 ----
 # Run ping playbook against all hosts/containers
-ansible-playbook playbook-ping.yml
+ansible-playbook playbooks/ping.yml
 
 # Run ping playbook against all hosts/containers using forks parameter for performance
-ansible-playbook playbook-ping.yml --forks=10
+ansible-playbook playbooks/ping.yml --forks=10
 
 ----
 

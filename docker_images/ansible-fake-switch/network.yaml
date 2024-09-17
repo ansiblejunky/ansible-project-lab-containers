@@ -1,0 +1,6 @@
+hosts:
+  R1:
+    username: admin
+    password: admin
+    platform: cisco_ios
+    port: 6000

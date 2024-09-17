@@ -1,0 +1,13 @@
+---
+name: ansible
+networks:
+  default:
+    name: example.com
+
+# SCENARIO: Use these service definitions when testing direct connection without bastion host
+services:
+  target:
+    image: ansible-ssh-server
+    privileged: true
+    ports:
+      - "22"

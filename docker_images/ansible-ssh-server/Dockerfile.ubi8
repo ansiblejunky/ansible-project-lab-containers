@@ -1,0 +1,58 @@
+# Dockerfile Best Practices
+# https://docs.docker.com/develop/develop-images/dockerfile_best-practices/
+# Red Hat Container Certification Best Practices
+# https://developers.redhat.com/articles/2021/11/11/best-practices-building-images-pass-red-hat-container-certification
+# Reduce the size of container images with DockerSlim
+# https://developers.redhat.com/articles/2022/01/17/reduce-size-container-images-dockerslim
+
+# ERROR:
+# Container exits with following message
+# /etc/ssh/sshd_config: Permission denied
+
+# Best practice - choose a universal base image (ubi)
+FROM registry.access.redhat.com/ubi8/python-38
+
+# Best practice - RH Container Certification requires overriding the following labels in your image
+LABEL name="my-namespace/my-image-name" \
+      vendor="My Company, Inc." \
+      version="1.2.3" \
+      release="45" \
+      summary="Web search application" \
+      description="This application searches the web for interesting stuff."
+
+# Best practice - Include license information
+# GNU GPLv3 selected based on https://choosealicense.com/
+COPY LICENSE /licenses
+
+USER root
+ARG ssh_user=admin
+ENV SSH_USER=${ssh_user}
+ARG ssh_password=admin
+ENV SSH_PASSWORD=${ssh_password}
+ARG ssh_public_key_file=vagrant.pub
+ENV SSH_PUBLIC_KEY_FILE=${ssh_public_key_file}
+ARG ssh_path=/home/${ssh_user}/.ssh
+
+RUN adduser ${SSH_USER}
+RUN usermod -aG wheel ${SSH_USER} --shell /bin/bash
+RUN echo "${SSH_USER}:${SSH_PASSWORD}" | chpasswd
+RUN mkdir ${ssh_path}
+RUN chown ${SSH_USER} ${ssh_path}
+RUN chmod 700 ${ssh_path}
+COPY ${SSH_PUBLIC_KEY_FILE} ${ssh_path}/authorized_keys
+RUN chmod 400 ${ssh_path}/authorized_keys
+RUN chown ${SSH_USER} ${ssh_path}/authorized_keys
+
+# Best practice - Include the latest security updates in your image
+RUN yum -y update
+RUN yum install -y openssh
+RUN yum install -y openssh-server
+RUN yum install -y sudo
+RUN yum clean all
+RUN systemctl enable sshd
+
+# Best practice - Make the image run as non-root user
+USER ${SSH_USER}
+EXPOSE 22
+CMD ["/usr/sbin/sshd","-D"]
+#CMD ["/sbin/init"]

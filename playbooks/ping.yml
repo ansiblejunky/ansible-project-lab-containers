@@ -1,6 +1,6 @@
 ---
 - name: Demo playbook accessing the remote target and jumpboxes
-  hosts: all
+  hosts: bastions:targets
   become: false
   gather_facts: false
 

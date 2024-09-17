@@ -1,0 +1,8 @@
+---
+- hosts: network_libssh
+  gather_facts: false
+
+  tasks:
+  - name: run show version command
+    ansible.netcommon.cli_command:
+      command: show version

@@ -1,0 +1,14 @@
+---
+name: ansible
+networks:
+  default:
+    name: example.com
+
+# SCENARIO: Use these services when testing indirect connection with bastion host
+services:
+  target:
+    image: ansible-fake-switch
+    hostname: fake
+    privileged: true
+    ports:
+      - "12723:6000"
